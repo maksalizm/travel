@@ -51,7 +51,7 @@ function UploadProductPage(props) {
     e.preventDefault();
   
     if(!titleValue || !descriptionValue || !priceValue ||
-    !images.length || continentsValue) {
+    !images || !continentsValue) {
       return alert('fill all the fields first');
     }
     
