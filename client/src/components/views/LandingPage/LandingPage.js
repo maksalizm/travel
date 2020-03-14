@@ -5,6 +5,8 @@ import { Card, Col, Icon, Row } from 'antd';
 import Meta from 'antd/lib/card/Meta';
 import ImageSlider from '../../utils/ImageSlider';
 import CheckBox from './Sections/CheckBox';
+import RadioBox from './Sections/RadioBox';
+import { price, continents } from './Sections/Data';
 
 function LandingPage() {
   
@@ -79,13 +81,26 @@ function LandingPage() {
     setSkip(0);
   };
   
+  const handlePrice = (value) => {
+    const data = price;
+    let array = [];
+    
+    for (let key in data) {
+      if(data[key]._id === parseInt(value, 10)) {
+        array = [...data[key].array];
+      }
+    }
+    return array;
+  };
+  
   const handleFilters = (paramFilters, category) => {
     const newFilters = {...filters};
     
     newFilters[category] = paramFilters;
     
     if(category === "price") {
-    
+      let priceValue = handlePrice(paramFilters);
+      newFilters[category] = priceValue;
     }
     
     showFilteredResults(newFilters);
@@ -97,9 +112,22 @@ function LandingPage() {
       <div style={{textAlign: "center"}}>
         <h2> Let's Travel Anywhere <Icon type="rocket"/></h2>
       </div>
-      <CheckBox
-        handleFilters={paramFilters => handleFilters(paramFilters, 'continents')}
-      />
+      
+      <Row gutter={[16, 16]}>
+        <Col lg={12} xs={24} >
+          <CheckBox
+            list={continents}
+            handleFilters={paramFilters => handleFilters(paramFilters, 'continents')}
+          />
+        </Col>
+        <Col lg={12} xs={24} >
+          <RadioBox
+            list={price}
+            handleFilters={paramFilters => handleFilters(paramFilters, 'price')}
+          />
+        </Col>
+      </Row>
+      
       {products.length === 0 ?
         <div style={{display: "flex", height: "300px", justifyContent: "center", alignItems: "center"}}>
           <h2>No post yes...</h2>
