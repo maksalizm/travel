@@ -4,6 +4,7 @@ import { FaCode } from "react-icons/fa";
 import { Card, Col, Icon, Row } from 'antd';
 import Meta from 'antd/lib/card/Meta';
 import ImageSlider from '../../utils/ImageSlider';
+import CheckBox from './Sections/CheckBox';
 
 function LandingPage() {
   
@@ -11,6 +12,10 @@ function LandingPage() {
   const [skip, setSkip] = useState(0);
   const [limit, setLimit] = useState(8);
   const [postSize, setPostSize] = useState(0);
+  const [filters, setFilters] = useState({
+    continents: [],
+    price: []
+  });
   
   useEffect(() => {
     const postData = {
@@ -24,8 +29,12 @@ function LandingPage() {
       Axios.post('/api/product/getProducts', postData)
            .then(res => {
              if (res.data.success) {
-               setProducts([...products, ...res.data.products]);
-               setPostSize(res.data.postSize)
+               if(postData.loadMore) {
+                 setProducts([...products, ...res.data.products]);
+                 setPostSize(res.data.postSize)
+               } else {
+                 setProducts([...res.data.products])
+               }
              } else {
                alert('Failed to fetch product datas')
              }
@@ -36,9 +45,11 @@ function LandingPage() {
   
   const onLoadMore = (postData) => {
     let nextSkip = skip + limit;
+    
     postData = {
       skip: nextSkip,
-      limit
+      limit,
+      loadMore: true
     };
     
     getProducts(postData);
@@ -55,11 +66,40 @@ function LandingPage() {
       </Card>
     </Col>
   });
+  
+  const showFilteredResults = (paramFilters) => {
+  
+    const postData = {
+      skip: 0,
+      limit,
+      filters: paramFilters
+    };
+    getProducts(postData);
+    
+    setSkip(0);
+  };
+  
+  const handleFilters = (paramFilters, category) => {
+    const newFilters = {...filters};
+    
+    newFilters[category] = paramFilters;
+    
+    if(category === "price") {
+    
+    }
+    
+    showFilteredResults(newFilters);
+    setFilters(newFilters);
+  };
+  
   return (
     <div style={{width: "75%", margin: "3rem auto"}}>
       <div style={{textAlign: "center"}}>
         <h2> Let's Travel Anywhere <Icon type="rocket"/></h2>
       </div>
+      <CheckBox
+        handleFilters={paramFilters => handleFilters(paramFilters, 'continents')}
+      />
       {products.length === 0 ?
         <div style={{display: "flex", height: "300px", justifyContent: "center", alignItems: "center"}}>
           <h2>No post yes...</h2>
