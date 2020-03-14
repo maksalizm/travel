@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Button, Form, Input, Typography } from 'antd';
 
 import FileUpload from '../../utils/FileUpload';
+import Axios from 'axios';
 
 const {Title} = Typography;
 const {TextArea} = Input;
@@ -22,7 +23,7 @@ function UploadProductPage(props) {
   const [descriptionValue, setDescriptionValue] = useState("");
   const [priceValue, setPriceValue] = useState(0);
   const [continentsValue, setContinentsValue] = useState(1);
-  const [Images, setImages] = useState([]);
+  const [images, setImages] = useState([]);
   
   const onTitleChange = (e) => {
     setTitleValue(e.currentTarget.value);
@@ -44,12 +45,41 @@ function UploadProductPage(props) {
     setImages(newImages);
   };
   
+  
+  
+  const onSubmit = (e) => {
+    e.preventDefault();
+  
+    if(!titleValue || !descriptionValue || !priceValue ||
+    !images.length || continentsValue) {
+      return alert('fill all the fields first');
+    }
+    
+    const postData = {
+      writer: props.user.userData._id,
+      title: titleValue,
+      description: descriptionValue,
+      price: priceValue,
+      images: images,
+      continents: continentsValue
+    };
+    Axios.post('/api/product/uploadProduct', postData)
+      .then(res => {
+        if(res.data.success) {
+          alert('Product Successfully Uploaded');
+          props.history.push('/');
+        } else {
+          alert('Failed to upload Product')
+        }
+      });
+  };
+  
   return (
     <div style={{maxWidth: '700px', margin: '2rem auto'}}>
       <div style={{textAlign: 'center', marginBottom: '2rem'}}>
         <Title level={2}>Upload Travel Product</Title>
       </div>
-      <Form action="">
+      <Form action="" onSubmit={onSubmit}>
         <FileUpload refreshFrunction={updateImages}/>
         <br/>
         <br/>
@@ -79,8 +109,7 @@ function UploadProductPage(props) {
         </select>
         <br/>
         <br/>
-        <Button
-          onClick>
+        <Button onClick={onSubmit}>
           Submit
         </Button>
       </Form>
