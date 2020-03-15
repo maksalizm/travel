@@ -7,6 +7,7 @@ import ImageSlider from '../../utils/ImageSlider';
 import CheckBox from './Sections/CheckBox';
 import RadioBox from './Sections/RadioBox';
 import { price, continents } from './Sections/Data';
+import SearchFeature from './Sections/SearchFeature';
 
 function LandingPage() {
   
@@ -14,6 +15,7 @@ function LandingPage() {
   const [skip, setSkip] = useState(0);
   const [limit, setLimit] = useState(8);
   const [postSize, setPostSize] = useState(0);
+  const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState({
     continents: [],
     price: []
@@ -33,10 +35,10 @@ function LandingPage() {
              if (res.data.success) {
                if(postData.loadMore) {
                  setProducts([...products, ...res.data.products]);
-                 setPostSize(res.data.postSize)
                } else {
                  setProducts([...res.data.products])
                }
+               setPostSize(res.data.postSize)
              } else {
                alert('Failed to fetch product datas')
              }
@@ -107,6 +109,20 @@ function LandingPage() {
     setFilters(newFilters);
   };
   
+  const updateSearchTerms = (newSearchTerm) => {
+    setSearchTerm(newSearchTerm);
+    const postData = {
+      skip: 0,
+      limit,
+      filters,
+      searchTerm: newSearchTerm
+    };
+    
+    setSkip(0);
+    
+    getProducts(postData)
+  };
+  
   return (
     <div style={{width: "75%", margin: "3rem auto"}}>
       <div style={{textAlign: "center"}}>
@@ -127,6 +143,11 @@ function LandingPage() {
           />
         </Col>
       </Row>
+      <div style={{display: 'flex', justifyContent:'flex-end', margin: '1rem auto'}}>
+        <SearchFeature
+          refreshFunction={updateSearchTerms}
+        />
+      </div>
       
       {products.length === 0 ?
         <div style={{display: "flex", height: "300px", justifyContent: "center", alignItems: "center"}}>
