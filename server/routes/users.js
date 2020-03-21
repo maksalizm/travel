@@ -1,4 +1,5 @@
 const express = require('express');
+const {Product} = require('../models/Product');
 const router = express.Router();
 const {User} = require("../models/User");
 
@@ -18,6 +19,8 @@ router.get("/auth", auth, (req, res) => {
     lastname: req.user.lastname,
     role: req.user.role,
     image: req.user.image,
+    cart: req.user.cart,
+    history: req.user.history
   });
 });
 
@@ -68,14 +71,13 @@ router.get("/logout", auth, (req, res) => {
   });
 });
 
-router.post("/addToCart", auth, (req, res) => {
+router.get("/addToCart", auth, (req, res) => {
   User.findOne({_id: req.user._id}
     , (err, userInfo) => {
-      console.log('userInfo',userInfo);
       let duplicate = false;
       
       userInfo.cart.forEach((cartInfo) => {
-        if (cartInfo._id === req.query.productId) {
+        if (cartInfo.id === req.query.productId) {
           duplicate = true;
         }
       });
@@ -112,6 +114,31 @@ router.post("/addToCart", auth, (req, res) => {
           )
       }
     })
+});
+
+
+router.get('/removeFromCart', auth, (req, res) => {
+  User.findOneAndUpdate(
+    {_id:req.user._id},
+    {"$pull":
+        {"cart":{"id":req.query.id}}
+    },
+    {new:true},
+    (err, userInfo) => {
+      let cart = userInfo.cart;
+      let array = cart.map(item => {
+        return item.id
+      });
+      Product.find({'_id': {$in:array}})
+        .populate('writer')
+        .exec((err, cartDetail) => {
+          return res.status(200).json({
+            cartDetail,
+            cart
+          })
+        })
+    }
+    )
 });
 
 module.exports = router;
